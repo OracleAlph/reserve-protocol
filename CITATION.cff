@@ -1,0 +1,31 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it as below."
+type: software
+title: "The Reserve Protocol: Clinic App"
+version: 1.0.0
+license: MIT
+url: "https://protocol.theaskingpress.com"
+authors:
+  - family-names: "O'Leary"
+    given-names: "Robert T."
+    orcid: "https://orcid.org/0009-0008-9552-358X"
+    affiliation: "Orlando College of Osteopathic Medicine"
+references:
+  - type: article
+    title: "The Reserve Protocol: A Measurement Specification for Functional Reserve"
+    authors:
+      - family-names: "O'Leary"
+        given-names: "Robert T."
+    year: 2026
+    doi: "10.20944/preprints202609.1685.v1"
+  - type: article
+    title: "The Preservation of Functional Reserve: A Control Systems Framework for Human Aging"
+    authors:
+      - family-names: "O'Leary"
+        given-names: "Robert T."
+    journal: "Life"
+    year: 2026
+    volume: 16
+    issue: 9
+    start: 1457
+    doi: "10.3390/life16091457"

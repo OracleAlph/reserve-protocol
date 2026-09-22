@@ -1,0 +1,14 @@
+{
+  "title": "The Reserve Protocol: Clinic App",
+  "upload_type": "software",
+  "creators": [
+    {"name": "O'Leary, Robert T.", "orcid": "0009-0008-9552-358X", "affiliation": "Orlando College of Osteopathic Medicine"}
+  ],
+  "description": "Companion web app for The Reserve Protocol, a proposed measurement specification for functional reserve (capacity minus demand). Runs the Tier One clinic card, the Tier Two loaded protocol and the Tier Three determinant panel. Not validated. Not a guideline.",
+  "license": "MIT",
+  "keywords": ["functional reserve", "gait speed", "aging", "measurement", "rehabilitation"],
+  "related_identifiers": [
+    {"identifier": "10.20944/preprints202609.1685.v1", "relation": "isSupplementTo", "scheme": "doi"},
+    {"identifier": "10.3390/life16091457", "relation": "references", "scheme": "doi"}
+  ]
+}
