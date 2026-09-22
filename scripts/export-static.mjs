@@ -3,8 +3,19 @@
  * Copy the client static output into `dist/` so Cloudflare Pages can host it.
  * TanStack Start + Nitro (Vercel preset) writes the browser assets to
  * `.vercel/output/static`; SPA prerender may also write `dist/client`.
+ *
+ * Strips grok.com scripts so the hosted site loads no third-party Grok chrome.
  */
-import { cpSync, existsSync, mkdirSync, rmSync, writeFileSync } from "node:fs";
+import {
+  cpSync,
+  existsSync,
+  mkdirSync,
+  readFileSync,
+  readdirSync,
+  rmSync,
+  statSync,
+  writeFileSync,
+} from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -23,6 +34,23 @@ function hasHtml(dir) {
 
 function hasAssets(dir) {
   return existsSync(join(dir, "assets")) || hasHtml(dir);
+}
+
+function walkFiles(dir, acc = []) {
+  for (const name of readdirSync(dir)) {
+    const next = join(dir, name);
+    if (statSync(next).isDirectory()) walkFiles(next, acc);
+    else acc.push(next);
+  }
+  return acc;
+}
+
+/** Remove any script whose src is grok.com so the static host never loads it. */
+export function stripGrokScripts(html) {
+  return String(html).replace(
+    /<script\b[^>]*\bsrc\s*=\s*["']https:\/\/grok\.com[^"']*["'][^>]*>\s*<\/script>/gi,
+    "",
+  );
 }
 
 const src = candidates.find((p) => existsSync(p) && hasAssets(p));
@@ -44,6 +72,13 @@ if (!existsSync(join(tmp, "_redirects"))) {
   writeFileSync(join(tmp, "_redirects"), "/*    /index.html   200\n");
 }
 
+for (const file of walkFiles(tmp)) {
+  if (!file.endsWith(".html")) continue;
+  const before = readFileSync(file, "utf8");
+  const after = stripGrokScripts(before);
+  if (after !== before) writeFileSync(file, after);
+}
+
 rmSync(DEST, { recursive: true, force: true });
 mkdirSync(dirname(DEST), { recursive: true });
 cpSync(tmp, DEST, { recursive: true });
@@ -51,6 +86,16 @@ rmSync(tmp, { recursive: true, force: true });
 
 if (!existsSync(join(DEST, "index.html"))) {
   console.error("[export-static] dist/index.html missing after copy");
+  process.exit(1);
+}
+
+const leftover = walkFiles(DEST).filter((file) => {
+  if (!/\.(html|js|mjs|css)$/.test(file)) return false;
+  const text = readFileSync(file, "utf8");
+  return /<script\b[^>]*src=["']https:\/\/grok\.com/i.test(text);
+});
+if (leftover.length > 0) {
+  console.error("[export-static] grok.com scripts remain in", leftover);
   process.exit(1);
 }
 

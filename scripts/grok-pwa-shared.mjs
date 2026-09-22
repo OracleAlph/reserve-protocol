@@ -202,6 +202,15 @@ export function grokPwaHeadTags(appName = DEFAULT_APP_NAME) {
 
 export const GROK_EXTENSIONS_SCRIPT_SRC = "https://grok.com/grok-app-builder/extensions.js";
 
+/** Live Grok preview may inject the banner; the static production build must not. */
+export function shouldInjectGrokExtensionsScript() {
+  const flag = String(process.env.GROK_PWA_EXTENSIONS ?? "").trim().toLowerCase();
+  if (flag === "0" || flag === "false" || flag === "off") return false;
+  if (flag === "1" || flag === "true" || flag === "on") return true;
+  if (process.env.npm_lifecycle_event === "build") return false;
+  return true;
+}
+
 export function readGrokProjectId() {
   const fromProcess = typeof process !== "undefined" ? process.env?.VITE_PROJECT_ID : "";
   return String(fromProcess ?? "").trim();
@@ -227,18 +236,20 @@ export function grokXCreatorHeadTags(creator = readXCreator(), creatorId = readX
   ];
 }
 
-/** Platform "Created with Grok" banner — injected into every HTML document. */
+/** Platform "Created with Grok" banner — live preview only, never the static dist. */
 export function grokExtensionsHeadTags(projectId = readGrokProjectId()) {
   const id = escapeHtml(projectId);
   const tags = [];
   if (projectId) {
     tags.push(`<meta name="grok-project-id" content="${id}">`);
   }
-  tags.push(
-    `<script src="${GROK_EXTENSIONS_SCRIPT_SRC}"${
-      projectId ? ` data-project-id="${id}"` : ""
-    } defer></script>`,
-  );
+  if (shouldInjectGrokExtensionsScript()) {
+    tags.push(
+      `<script src="${GROK_EXTENSIONS_SCRIPT_SRC}"${
+        projectId ? ` data-project-id="${id}"` : ""
+      } defer></script>`,
+    );
+  }
   return tags;
 }
 
